@@ -5,21 +5,19 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Lister les conversations d’un user, avec le dernier message
-router.get('/:userId', auth, async (req, res) => {
+router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const convos = await Conversation.find({
-      participants: userId
-    })
-    .populate({
-      path: 'lastMessage',
-      select: 'text fileUrl createdAt senderId receiverId'
-    })
-    .sort({ updatedAt: -1 });
+    const convos = await Conversation.find({ participants: userId })
+      .populate({
+        path: 'lastMessage',
+        select: 'text createdAt senderId'
+      })
+      .sort({ updatedAt: -1 });
     res.json(convos);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Convo fetch error', err);
+    res.status(500).json({ message: err.message });
   }
 });
 
